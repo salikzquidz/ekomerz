@@ -1,13 +1,12 @@
 const { Router } = require("express");
-const Cart = require("../models/cartModel");
+const Buyer = require("../models/buyerModel");
 const router = Router();
 
 router.post("/cart", async (req, res) => {
   const { userId, products } = req.body;
-  console.log(userId);
+
   try {
-    // add something to cart
-    const cart2 = await Cart.updateOne(
+    const buyer = await Buyer.updateOne(
       {
         _id: userId,
         "products.productId": products.productId,
@@ -19,9 +18,14 @@ router.post("/cart", async (req, res) => {
       }
     );
 
-    // if the product id not exist in this user's cart, push this product into this user cart
-    if (!cart2.matchedCount) {
-      await Cart.updateOne(
+    // check negative value - dont push new item to cart if negative value provided
+    if (!buyer.matchedCount && products.quantity <= 0) {
+      throw "Invalid quantity value";
+    }
+
+    // if item not exist, push this item into products array
+    if (!buyer.matchedCount) {
+      await Buyer.updateOne(
         {
           _id: userId,
         },
@@ -31,17 +35,28 @@ router.post("/cart", async (req, res) => {
           },
         }
       );
-      res.send("new item inserted into cart");
+      res.send("New item added to cart");
     } else {
-      res.send("cart updated, increased!");
+      // remove zero quantity product -- maybe need to move this to somewhere else
+      await Buyer.updateMany(
+        {
+          _id: userId,
+          "products.productId": products.productId,
+        },
+        {
+          $pull: { products: { quantity: { $lt: 1 } } },
+        }
+      );
+      res.send("Selected item updated in the cart");
     }
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 });
 
 // to do
-// update cart of same user
-// check
+// find out how to calculate the sum of subdocuments - cart quantity
+// research how to prevent negative value - currently relying on front end
 
 module.exports = router;

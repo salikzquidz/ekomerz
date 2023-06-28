@@ -4,6 +4,7 @@ const cors = require("cors");
 const productRoutes = require("../routes/productRoutes");
 const cartRoutes = require("../routes/cartRoutes");
 const authRoutes = require("../routes/authRoutes");
+require("dotenv").config();
 
 module.exports = function (app) {
   app.use(express.json());
