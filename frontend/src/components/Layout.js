@@ -1,11 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import {
+  Badge,
   Container,
   CssBaseline,
-  Link,
   Switch,
   ThemeProvider,
   createTheme,
@@ -14,6 +14,8 @@ import {
 import { Helmet } from "react-helmet";
 import { Store } from "../store/context";
 import Cookies from "js-cookie";
+import { Outlet, useNavigate, NavLink } from "react-router-dom";
+import client from "../utils/build-client";
 
 const MyAppBar = styled(AppBar)({
   backgroundColor: "#203040",
@@ -39,7 +41,11 @@ const MyTypography = styled(Typography)({
 
 export default function Layout({ title, children }) {
   const { state, dispatch } = useContext(Store);
-  const { darkMode } = state;
+  const { darkMode, userInfo } = state;
+  console.log("in layout");
+  console.log(darkMode);
+  console.log(userInfo);
+  const navigate = useNavigate();
 
   const theme = createTheme({
     typography: {
@@ -65,6 +71,38 @@ export default function Layout({ title, children }) {
     Cookies.set("darkMode", darkMode ? "OFF" : "ON");
   };
 
+  const logoutHandler = async () => {
+    try {
+      await client.post("logout");
+      dispatch({ type: "REMOVE_USER_INFO" }); // add to react context
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    const checkCurrentUser = async () => {
+      console.log("checking current user");
+      try {
+        const currentUser = await client.get("/currentuser");
+        const { data } = currentUser;
+        if (data?.id) {
+          console.log("id exist");
+          dispatch({ type: "ADD_USER_INFO", payload: data }); // add to react context
+        } else {
+          dispatch({ type: "REMOVE_USER_INFO" }); // add to react context
+        }
+      } catch (error) {
+        if (error.message.includes("Please login")) {
+          console.log("omg this user is not login");
+          navigate("/login");
+        }
+      }
+    };
+    checkCurrentUser();
+  }, [navigate, dispatch]);
+
   return (
     <div>
       <Helmet>
@@ -74,30 +112,49 @@ export default function Layout({ title, children }) {
         <CssBaseline />
         <MyAppBar>
           <Toolbar>
-            <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+            <NavLink
+              to="/"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
               <MyTypography>Ekomerz</MyTypography>
-            </Link>
+            </NavLink>
             <div style={{ flex: 1 }}></div>{" "}
             {/* gap between shop name and link */}
             <Switch
               checked={darkMode}
               onChange={darkModeChangeHandler}
             ></Switch>
-            <Link
-              href="/cart"
-              style={{ textDecoration: "none", color: "white" }}
+            <Badge
+              style={{ color: "white" }}
+              badgeContent={userInfo?.cart?.length}
             >
-              Cart
-            </Link>
-            <Link
-              href="/login"
-              style={{ textDecoration: "none", color: "white" }}
-            >
-              Login
-            </Link>
+              <NavLink
+                to="/cart"
+                style={{ textDecoration: "none", color: "white" }}
+              >
+                Cart
+              </NavLink>
+            </Badge>
+            {userInfo ? (
+              <NavLink
+                style={{ textDecoration: "none", color: "white" }}
+                onClick={logoutHandler}
+              >
+                Logout
+              </NavLink>
+            ) : (
+              <NavLink
+                to="/login"
+                style={{ textDecoration: "none", color: "white" }}
+              >
+                Login
+              </NavLink>
+            )}
           </Toolbar>
         </MyAppBar>
-        <MyContainer>{children}</MyContainer>
+        <MyContainer>
+          <Outlet />
+        </MyContainer>
         <MyFooter>
           <Typography>All rights reserved. 2023 Ekomerz.</Typography>
         </MyFooter>

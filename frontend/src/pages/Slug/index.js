@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Layout from "../../components/Layout";
-import axios from "axios";
 import {
   Button,
   Card,
@@ -14,6 +12,8 @@ import {
   styled,
 } from "@mui/material";
 import { Link as ReactRouterLink } from "react-router-dom";
+// import Cookies from "js-cookie";
+import client from "../../utils/build-client";
 
 const MyBackToHomepageLink = styled("div")({
   marginTop: 10,
@@ -26,23 +26,33 @@ export default function Slug(props) {
   const [qty, setQty] = useState(1);
   let { id } = useParams();
 
-  const getProductDetails = async () => {
+  const handleAddToCart = async () => {
+    console.log("sad");
     try {
-      let productFetched = await axios.get(
-        `http://localhost:3300/api/v1/product/${id}`
-      );
-      const { data } = productFetched;
-      setProduct(data);
+      // const cookies = Cookies.get("jwt");
+      // await axios.post("http://localhost:3300/api/v1/product")
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
+    const getProductDetails = async () => {
+      try {
+        let productFetched = await client.get(
+          `http://localhost:3300/api/v1/product/${id}`
+        );
+        const { data } = productFetched;
+        setProduct(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     getProductDetails();
-  }, []);
+  }, [id]);
 
   return (
-    <Layout title={product?.name}>
+    <>
       <MyBackToHomepageLink>
         <Link
           component={ReactRouterLink}
@@ -116,7 +126,12 @@ export default function Slug(props) {
                 </Grid>
               </ListItem>
               <ListItem>
-                <Button fullWidth variant="contained" color="primary">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddToCart}
+                >
                   Add to cart
                 </Button>
               </ListItem>
@@ -124,6 +139,6 @@ export default function Slug(props) {
           </Card>
         </Grid>
       </Grid>
-    </Layout>
+    </>
   );
 }

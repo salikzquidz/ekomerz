@@ -24,17 +24,43 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const buyer = await Buyer.findOne({ email });
-    const isPasswordMatch = await bcrypt.compare(password, buyer.password); // boolean
-    if (isPasswordMatch) {
-      const token = generateJwtToken(buyer._id);
-      res.cookie("jwt", token, { httpOnly: true, maxAge: jwtTokenAge * 1000 }); // maxAge is in ms
-      res.json({ buyer_id: buyer._id });
+    if (buyer) {
+      const isPasswordMatch = await bcrypt.compare(password, buyer?.password); // boolean
+      if (isPasswordMatch) {
+        const token = generateJwtToken(buyer._id);
+        res.cookie("jwt", token, {
+          httpOnly: true,
+          maxAge: jwtTokenAge * 1000,
+        }); // maxAge is in ms
+        res.json({
+          userInfo: {
+            id: buyer._id,
+            email: buyer.email,
+            products: buyer.products,
+          },
+        });
+      } else {
+        res.send("Invalid email or password");
+      }
     } else {
       res.send("Invalid email or password");
     }
   } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.post("/logout", async (req, res) => {
+  try {
+    res.clearCookie("jwt");
+    console.log("cookie jwt cleared");
+    res.send({});
+  } catch (error) {
+    console.log(error);
     res.send(error);
   }
 });

@@ -5,7 +5,6 @@ const router = Router();
 
 router.get("/products", async function (req, res) {
   console.log("showing the products for homepage");
-
   try {
     const products = await Product.find({});
     res.status(200).json(products);
