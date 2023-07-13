@@ -19,27 +19,28 @@ const MyForm = styled("form")({
   marginRight: "auto",
 });
 
-export default function Login() {
+export default function Signup() {
   const { dispatch } = useContext(Store);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     console.log("send login request ");
     try {
       const response = await Client.post(
-        "login",
+        "signup",
         {
           email,
           password,
         },
         { withCredentials: true }
       );
-      if (response?.data?.userInfo) {
-        dispatch({ type: "ADD_USER_INFO", payload: response.data.userInfo });
-        navigate("/");
+      if (response?.data?.includes("created")) {
+        // dispatch({ type: "ADD_USER_INFO", payload: response.data.userInfo });
+        navigate("/login");
       } else {
         console.log("invalid credentials");
       }
@@ -76,19 +77,29 @@ export default function Login() {
             ></TextField>
           </ListItem>
           <ListItem>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="confirmPassword"
+              label="Confirm Password"
+              inputProps={{ type: "password" }}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            ></TextField>
+          </ListItem>
+          <ListItem>
             <Button
               variant="contained"
               fullWidth
               color="primary"
-              onClick={handleLogin}
+              onClick={handleSignup}
             >
-              Login
+              Signup
             </Button>
           </ListItem>
           <ListItem>
-            Don&apos;t have an account? &nbsp;
-            <NavLink style={{ textDecoration: "none" }} to="/signup">
-              <Link style={{ textDecoration: "none" }}>Register</Link>
+            Already have an account? &nbsp;
+            <NavLink style={{ textDecoration: "none" }} to="/login">
+              <Link style={{ textDecoration: "none" }}>Login</Link>
             </NavLink>
           </ListItem>
         </List>

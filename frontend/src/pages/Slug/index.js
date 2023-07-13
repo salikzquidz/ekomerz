@@ -105,9 +105,16 @@ export default function Slug(props) {
                       type="number"
                       id="outlined-number"
                       size="small"
+                      onClick={() => {}}
                       inputProps={{
                         min: product?.countInStock ? 1 : "Not in stock",
                         max: product?.countInStock,
+                      }}
+                      onInput={(e) => {
+                        e.target.value =
+                          e.target.value > product?.countInStock
+                            ? product?.countInStock
+                            : e.target.value;
                       }}
                       value={qty}
                       onChange={(e) => setQty(e.target.value)}

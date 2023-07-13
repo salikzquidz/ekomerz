@@ -6,6 +6,7 @@ import {
   CardContent,
   CardMedia,
   Grid,
+  Link,
   Typography,
 } from "@mui/material";
 import client from "../../utils/build-client";
@@ -37,18 +38,23 @@ export default function Home() {
         {products?.map((product, index) => (
           <Grid item md={4} key={index}>
             <Card sx={{ maxWidth: 345 }}>
-              <NavLink to={`/product/${product._id}`}>
-                <CardActionArea>
-                  <CardMedia
-                    sx={{ height: 500 }}
-                    component="img"
-                    image={`http://localhost:3300/${product.image}`}
-                    title={product.name}
-                  ></CardMedia>
-                  <CardContent>
-                    <Typography>{product.name}</Typography>
-                  </CardContent>
-                </CardActionArea>
+              <NavLink
+                to={`/product/${product._id}`}
+                style={{ textDecoration: "none" }}
+              >
+                <Link style={{ textDecoration: "none" }}>
+                  <CardActionArea>
+                    <CardMedia
+                      sx={{ height: 500 }}
+                      component="img"
+                      image={`http://localhost:3300/${product.image}`}
+                      title={product.name}
+                    ></CardMedia>
+                    <CardContent>
+                      <Typography>{product.name}</Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Link>
               </NavLink>
               <CardActions>
                 <Typography>RM {product.price}</Typography>

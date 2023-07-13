@@ -4,8 +4,11 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import {
   Badge,
+  Button,
   Container,
   CssBaseline,
+  Menu,
+  MenuItem,
   Switch,
   ThemeProvider,
   createTheme,
@@ -73,12 +76,23 @@ export default function Layout({ title, children }) {
 
   const logoutHandler = async () => {
     try {
+      setAnchorEl(null);
       await client.post("logout");
       dispatch({ type: "REMOVE_USER_INFO" }); // add to react context
       navigate("/");
     } catch (error) {
       console.log(error);
     }
+  };
+
+  // Menu MUI
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -136,12 +150,31 @@ export default function Layout({ title, children }) {
               </NavLink>
             </Badge>
             {userInfo ? (
-              <NavLink
-                style={{ textDecoration: "none", color: "white" }}
-                onClick={logoutHandler}
-              >
-                Logout
-              </NavLink>
+              <>
+                <Button
+                  id="basic-button"
+                  aria-controls={open ? "basic-menu" : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? "true" : undefined}
+                  onClick={handleClick}
+                  style={{ color: "#ffffff", textTransform: "initial" }}
+                >
+                  {userInfo.email}
+                </Button>
+                <Menu
+                  id="basic-menu"
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleClose}
+                  MenuListProps={{
+                    "aria-labelledby": "basic-button",
+                  }}
+                >
+                  <MenuItem onClick={handleClose}>Profile</MenuItem>
+                  <MenuItem onClick={handleClose}>My account</MenuItem>
+                  <MenuItem onClick={logoutHandler}>Logout</MenuItem>
+                </Menu>
+              </>
             ) : (
               <NavLink
                 to="/login"

@@ -9,8 +9,8 @@ router.get("/currentuser", async (req, res) => {
   if (req.currentUser) {
     const buyer = await Buyer.findOne({ _id: req.currentUser.id });
     console.log(buyer);
-    const { _id, products } = buyer;
-    res.send({ id: _id, cart: products });
+    const { _id, products, email } = buyer;
+    res.send({ id: _id, cart: products, email });
   } else {
     console.log("guest visit");
     res.send("Guest mode, no problem");
