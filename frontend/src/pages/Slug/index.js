@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   Card,
@@ -14,6 +14,7 @@ import {
 import { Link as ReactRouterLink } from "react-router-dom";
 // import Cookies from "js-cookie";
 import client from "../../utils/build-client";
+import { Store } from "../../store/context";
 
 const MyBackToHomepageLink = styled("div")({
   marginTop: 10,
@@ -22,15 +23,24 @@ const MyBackToHomepageLink = styled("div")({
 });
 
 export default function Slug(props) {
+  const { state, dispatch } = useContext(Store);
   const [product, setProduct] = useState(null);
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(0);
   let { id } = useParams();
+  const navigate = useNavigate();
+
+  const thisProductInCart = state.userInfo?.cart?.find(
+    (x) => x.productId === id
+  );
 
   const handleAddToCart = async () => {
-    console.log("sad");
     try {
-      // const cookies = Cookies.get("jwt");
-      // await axios.post("http://localhost:3300/api/v1/product")
+      await client.post("/cart", {
+        products: {
+          productId: id,
+          quantity: qty,
+        },
+      });
     } catch (error) {
       console.log(error);
     }
@@ -85,10 +95,30 @@ export default function Slug(props) {
               <Typography>Price : RM {product?.price}</Typography>
             </ListItem>
             <ListItem>
-              <Typography>Stock : {product?.countInStock}</Typography>
+              <Typography>
+                Stock : {product?.countInStock}
+                {thisProductInCart && (
+                  <>
+                    &nbsp; &nbsp;
+                    <b>
+                      <i>{thisProductInCart.quantity} in your cart</i>
+                    </b>
+                  </>
+                )}
+              </Typography>
             </ListItem>
             <ListItem>
               <Typography>Rating : {product?.numReviews}</Typography>
+            </ListItem>
+            <ListItem>
+              <Typography>
+                This item in your cart :{" "}
+                {thisProductInCart
+                  ? `GOT, now can only add ${
+                      product?.countInStock - thisProductInCart.quantity
+                    } more`
+                  : "NO GOT"}
+              </Typography>
             </ListItem>
           </List>
         </Grid>
@@ -107,14 +137,26 @@ export default function Slug(props) {
                       size="small"
                       onClick={() => {}}
                       inputProps={{
-                        min: product?.countInStock ? 1 : "Not in stock",
-                        max: product?.countInStock,
+                        min: product?.countInStock ? 0 : "Not in stock",
+                        max: thisProductInCart
+                          ? Math.abs(
+                              thisProductInCart.quantity - product?.countInStock
+                            )
+                          : product?.countInStock,
                       }}
                       onInput={(e) => {
-                        e.target.value =
-                          e.target.value > product?.countInStock
-                            ? product?.countInStock
-                            : e.target.value;
+                        if (thisProductInCart) {
+                          const max = Math.abs(
+                            thisProductInCart.quantity - product?.countInStock
+                          );
+                          e.target.value =
+                            e.target.value > max ? max : e.target.value;
+                        } else {
+                          e.target.value =
+                            e.target.value > product?.countInStock
+                              ? product?.countInStock
+                              : e.target.value;
+                        }
                       }}
                       value={qty}
                       onChange={(e) => setQty(e.target.value)}
@@ -138,6 +180,7 @@ export default function Slug(props) {
                   variant="contained"
                   color="primary"
                   onClick={handleAddToCart}
+                  disabled={qty === 0}
                 >
                   Add to cart
                 </Button>

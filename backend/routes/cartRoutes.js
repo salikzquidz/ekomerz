@@ -3,12 +3,12 @@ const Buyer = require("../models/buyerModel");
 const router = Router();
 
 router.post("/cart", async (req, res) => {
-  const { userId, products } = req.body;
+  const { products } = req.body;
 
   try {
     const buyer = await Buyer.updateOne(
       {
-        _id: userId,
+        _id: req.currentUser.id,
         "products.productId": products.productId,
       },
       {
@@ -27,7 +27,7 @@ router.post("/cart", async (req, res) => {
     if (!buyer.matchedCount) {
       await Buyer.updateOne(
         {
-          _id: userId,
+          _id: req.currentUser.id,
         },
         {
           $push: {
@@ -40,7 +40,7 @@ router.post("/cart", async (req, res) => {
       // remove zero quantity product -- maybe need to move this to somewhere else
       await Buyer.updateMany(
         {
-          _id: userId,
+          _id: req.currentUser.id,
           "products.productId": products.productId,
         },
         {

@@ -15,10 +15,6 @@ function reducer(state, action) {
       return { ...state, darkMode: true };
     case "DARK_MODE_OFF":
       return { ...state, darkMode: false };
-    case "USER_LOGGED_IN":
-      return { ...state, currentUser: action.payload.user_id };
-    case "USER_LOGGED_OUT":
-      return { ...state, currentUser: null };
     case "ADD_USER_INFO":
       return { ...state, userInfo: action.payload };
     case "REMOVE_USER_INFO":
