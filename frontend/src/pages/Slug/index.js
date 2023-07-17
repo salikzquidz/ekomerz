@@ -12,9 +12,9 @@ import {
   styled,
 } from "@mui/material";
 import { Link as ReactRouterLink } from "react-router-dom";
-// import Cookies from "js-cookie";
 import client from "../../utils/build-client";
 import { Store } from "../../store/context";
+import Cookies from "js-cookie";
 
 const MyBackToHomepageLink = styled("div")({
   marginTop: 10,
@@ -24,23 +24,39 @@ const MyBackToHomepageLink = styled("div")({
 
 export default function Slug(props) {
   const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(0);
   let { id } = useParams();
   const navigate = useNavigate();
 
-  const thisProductInCart = state.userInfo?.cart?.find(
-    (x) => x.productId === id
-  );
+  const thisProductInCart = userInfo?.cart?.find((x) => x.productId === id);
+
+  // for guest (store cart status inside cookies)
+  let thisProductInCookies;
+  if (Cookies.get("cart")) {
+    thisProductInCookies = JSON.parse(Cookies.get("cart")).find(
+      (x) => x.id === id
+    );
+  }
 
   const handleAddToCart = async () => {
     try {
-      await client.post("/cart", {
-        products: {
-          productId: id,
-          quantity: qty,
-        },
-      });
+      if (userInfo) {
+        await client.post("/cart", {
+          products: {
+            productId: id,
+            quantity: qty,
+          },
+        });
+        navigate(0); // to rerender the page so the badge number for the cart in Layout component will be updated
+      } else {
+        dispatch({
+          type: "ADD_ITEM_INTO_CART",
+          payload: { id, qty: parseInt(qty) },
+        });
+        navigate(0);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -97,7 +113,7 @@ export default function Slug(props) {
             <ListItem>
               <Typography>
                 Stock : {product?.countInStock}
-                {thisProductInCart && (
+                {userInfo && thisProductInCart && (
                   <>
                     &nbsp; &nbsp;
                     <b>
@@ -105,20 +121,18 @@ export default function Slug(props) {
                     </b>
                   </>
                 )}
+                {!userInfo && thisProductInCookies && (
+                  <>
+                    &nbsp; &nbsp;
+                    <b>
+                      <i>{thisProductInCookies.qty} in your cart</i>
+                    </b>
+                  </>
+                )}
               </Typography>
             </ListItem>
             <ListItem>
               <Typography>Rating : {product?.numReviews}</Typography>
-            </ListItem>
-            <ListItem>
-              <Typography>
-                This item in your cart :{" "}
-                {thisProductInCart
-                  ? `GOT, now can only add ${
-                      product?.countInStock - thisProductInCart.quantity
-                    } more`
-                  : "NO GOT"}
-              </Typography>
             </ListItem>
           </List>
         </Grid>
@@ -138,16 +152,28 @@ export default function Slug(props) {
                       onClick={() => {}}
                       inputProps={{
                         min: product?.countInStock ? 0 : "Not in stock",
-                        max: thisProductInCart
-                          ? Math.abs(
-                              thisProductInCart.quantity - product?.countInStock
-                            )
-                          : product?.countInStock,
+                        max:
+                          userInfo && thisProductInCart
+                            ? Math.abs(
+                                thisProductInCart.quantity -
+                                  product?.countInStock
+                              )
+                            : !userInfo && thisProductInCookies
+                            ? Math.abs(
+                                thisProductInCookies.qty - product?.countInStock
+                              )
+                            : product?.countInStock,
                       }}
                       onInput={(e) => {
-                        if (thisProductInCart) {
+                        if (userInfo && thisProductInCart) {
                           const max = Math.abs(
                             thisProductInCart.quantity - product?.countInStock
+                          );
+                          e.target.value =
+                            e.target.value > max ? max : e.target.value;
+                        } else if (!userInfo && thisProductInCookies) {
+                          const max = Math.abs(
+                            thisProductInCookies.qty - product?.countInStock
                           );
                           e.target.value =
                             e.target.value > max ? max : e.target.value;
@@ -180,7 +206,7 @@ export default function Slug(props) {
                   variant="contained"
                   color="primary"
                   onClick={handleAddToCart}
-                  disabled={qty === 0}
+                  disabled={qty == 0}
                 >
                   Add to cart
                 </Button>

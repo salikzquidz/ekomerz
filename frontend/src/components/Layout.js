@@ -44,7 +44,7 @@ const MyTypography = styled(Typography)({
 
 export default function Layout({ title, children }) {
   const { state, dispatch } = useContext(Store);
-  const { darkMode, userInfo } = state;
+  const { darkMode, userInfo, cart } = state;
   console.log("in layout");
   console.log(darkMode);
   console.log(userInfo);
@@ -101,6 +101,7 @@ export default function Layout({ title, children }) {
       try {
         const currentUser = await client.get("/currentuser");
         const { data } = currentUser;
+
         if (data?.id) {
           console.log("id exist");
           dispatch({ type: "ADD_USER_INFO", payload: data }); // add to react context
@@ -140,7 +141,7 @@ export default function Layout({ title, children }) {
             ></Switch>
             <Badge
               style={{ color: "white" }}
-              badgeContent={userInfo?.cart?.length}
+              badgeContent={userInfo ? userInfo.cart?.length : cart?.length}
             >
               <NavLink
                 to="/cart"
