@@ -2,11 +2,28 @@ import Cookies from "js-cookie";
 import { createContext, useReducer } from "react";
 
 export const Store = createContext();
+
+const examineTheCartCookies = () => {
+  console.log(Cookies.get("cart"));
+  let cartCookies = Cookies.get("cart"); // cookies is string always
+  try {
+    let jsonParsedCartCookie = JSON.parse(cartCookies);
+    if (jsonParsedCartCookie.length > 0) {
+      return JSON.parse(cartCookies);
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
 const initialState = {
   darkMode: Cookies.get("darkMode") === "ON" ? true : false,
   currentUser: Cookies.get("currentUser"),
   userInfo: null,
-  cart: Cookies.get("cart") ? JSON.parse(Cookies.get("cart")) : [], // for guest
+  cart: examineTheCartCookies(), // for guest cart
 };
 
 function reducer(state, action) {
@@ -19,30 +36,85 @@ function reducer(state, action) {
       return { ...state, userInfo: action.payload };
     case "REMOVE_USER_INFO":
       return { ...state, userInfo: null };
-    case "ADD_ITEM_INTO_CART": // for guest, store the cart info inside cookies and React context
-      // check if item already exist in the cart
-      let itemFound = state.cart?.find((x) => x.id === action.payload.id);
+    case "UPDATE_CART":
+      let itemFoundd = state.userInfo.cart.find(
+        (x) => x.productId === action.payload.id
+      );
+
+      // expect id and quantity from payload
+      if (itemFoundd) {
+        let newCart = state.userInfo.cart.map((x) => {
+          return { ...x };
+        });
+        newCart.find((x) => x.productId === action.payload.id).quantity =
+          Number(itemFoundd.quantity) + Number(action.payload.quantity);
+
+        if (
+          Number(itemFoundd.quantity) + Number(action.payload.quantity) ==
+          0
+        ) {
+          return {
+            ...state,
+            userInfo: {
+              ...state.userInfo,
+              cart: state.userInfo.cart.filter(
+                (x) => x.productId !== action.payload.id
+              ),
+            },
+          };
+        }
+
+        return {
+          ...state,
+          userInfo: {
+            ...state.userInfo,
+            cart: newCart,
+          },
+        };
+      } else {
+        return {
+          ...state,
+          userInfo: {
+            ...state.userInfo,
+            cart: [...state.userInfo.cart, action.payload],
+          },
+        };
+      }
+    case "EDIT_GUEST_CART": // EDIT ITEM - for guest / cookies
+      let itemFound = state.cart?.find(
+        (x) => x.productId === action.payload.id
+      );
       let updatedCartArray;
 
       if (itemFound) {
-        // create new array
         updatedCartArray = state.cart.map((x) => {
           return { ...x };
         });
-        let currentQty = updatedCartArray.find(
-          (x) => x.id === action.payload.id
-        ).qty;
-        updatedCartArray.find((x) => x.id === action.payload.id).qty =
-          currentQty + action.payload.qty;
 
+        if (itemFound.quantity + action.payload.quantity == 0) {
+          Cookies.set(
+            "cart",
+            JSON.stringify(
+              state.cart.filter((x) => x.productId !== action.payload.id)
+            )
+          );
+          return {
+            ...state,
+            cart: state.cart.filter((x) => x.productId !== action.payload.id),
+          };
+        } else {
+          updatedCartArray.find(
+            (x) => x.productId === action.payload.id
+          ).quantity = itemFound.quantity + action.payload.quantity;
+          Cookies.set("cart", JSON.stringify(updatedCartArray));
+          return { ...state, cart: updatedCartArray };
+        }
+      } else {
+        // push new item
+        updatedCartArray = [...state.cart, action.payload];
         Cookies.set("cart", JSON.stringify(updatedCartArray));
-        return { ...state, cart: updatedCartArray };
+        return { ...state, cart: [...state.cart, action.payload] };
       }
-
-      // push new item
-      updatedCartArray = [...state.cart, action.payload];
-      Cookies.set("cart", JSON.stringify(updatedCartArray));
-      return { ...state, cart: [...state.cart, action.payload] };
     default:
       return state;
   }

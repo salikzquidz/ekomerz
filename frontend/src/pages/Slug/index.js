@@ -14,7 +14,6 @@ import {
 import { Link as ReactRouterLink } from "react-router-dom";
 import client from "../../utils/build-client";
 import { Store } from "../../store/context";
-import Cookies from "js-cookie";
 
 const MyBackToHomepageLink = styled("div")({
   marginTop: 10,
@@ -22,23 +21,18 @@ const MyBackToHomepageLink = styled("div")({
   textDecoration: "none",
 });
 
-export default function Slug(props) {
+export default function Slug() {
   const { state, dispatch } = useContext(Store);
-  const { userInfo } = state;
+  const { userInfo, cart } = state;
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(0);
   let { id } = useParams();
   const navigate = useNavigate();
 
+  // user cart
   const thisProductInCart = userInfo?.cart?.find((x) => x.productId === id);
-
-  // for guest (store cart status inside cookies)
-  let thisProductInCookies;
-  if (Cookies.get("cart")) {
-    thisProductInCookies = JSON.parse(Cookies.get("cart")).find(
-      (x) => x.id === id
-    );
-  }
+  // guest cart
+  const thisProductInCookies = cart?.find((x) => x.productId === id);
 
   const handleAddToCart = async () => {
     try {
@@ -49,13 +43,18 @@ export default function Slug(props) {
             quantity: qty,
           },
         });
-        navigate(0); // to rerender the page so the badge number for the cart in Layout component will be updated
+        dispatch({ type: "UPDATE_CART", payload: { id, quantity: qty } }); // update userInfo context
+        navigate("/cart");
       } else {
+        // for guest - save into cookies and context
         dispatch({
-          type: "ADD_ITEM_INTO_CART",
-          payload: { id, qty: parseInt(qty) },
+          type: "EDIT_GUEST_CART",
+          payload: {
+            productId: id,
+            quantity: parseInt(qty),
+          },
         });
-        navigate(0);
+        navigate("/cart");
       }
     } catch (error) {
       console.log(error);
@@ -125,7 +124,7 @@ export default function Slug(props) {
                   <>
                     &nbsp; &nbsp;
                     <b>
-                      <i>{thisProductInCookies.qty} in your cart</i>
+                      <i>{thisProductInCookies?.quantity} in your cart</i>
                     </b>
                   </>
                 )}

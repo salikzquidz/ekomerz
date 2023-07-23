@@ -78,7 +78,7 @@ export default function Layout({ title, children }) {
     try {
       setAnchorEl(null);
       await client.post("logout");
-      dispatch({ type: "REMOVE_USER_INFO" }); // add to react context
+      dispatch({ type: "REMOVE_USER_INFO" });
       navigate("/");
     } catch (error) {
       console.log(error);
@@ -103,16 +103,12 @@ export default function Layout({ title, children }) {
         const { data } = currentUser;
 
         if (data?.id) {
-          console.log("id exist");
           dispatch({ type: "ADD_USER_INFO", payload: data }); // add to react context
         } else {
           dispatch({ type: "REMOVE_USER_INFO" }); // add to react context
         }
       } catch (error) {
-        if (error.message.includes("Please login")) {
-          console.log("omg this user is not login");
-          navigate("/login");
-        }
+        console.log(error);
       }
     };
     checkCurrentUser();
