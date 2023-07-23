@@ -3,13 +3,17 @@ import { Store } from "../../store/context";
 import {
   Button,
   ButtonGroup,
+  Card,
   Grid,
+  List,
+  ListItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import client from "../../utils/build-client";
 
@@ -251,7 +255,29 @@ export default function Cart() {
             </TableContainer>
           </Grid>
           <Grid item md={3} xs={12}>
-            Cart actions
+            <Card>
+              <List>
+                <ListItem>
+                  <Typography variant="h1" component={"h1"}>
+                    Subtotal ({cartItem?.reduce((a, c) => a + c.quantity, 0)}
+                    items) : RM{" "}
+                    {cartItem
+                      ?.reduce((a, c) => a + c.quantity * c.price, 0)
+                      .toFixed(2)}
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Button
+                    // onClick={checkoutHandler}
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                  >
+                    Check Out
+                  </Button>
+                </ListItem>
+              </List>
+            </Card>
           </Grid>
         </Grid>
       )}

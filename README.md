@@ -39,4 +39,6 @@ To launch as an independent e-commerce web application complete with these const
 - [x] Homepage
 - [x] Login Page
 - [x] Signup Page
-- [ ] Cart Page
+- [x] Cart Page
+- [ ] Checkout Page - delivery address, products ordered, payment preferences
+- [ ] Payment method component
