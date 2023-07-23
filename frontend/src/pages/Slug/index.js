@@ -159,7 +159,8 @@ export default function Slug() {
                               )
                             : !userInfo && thisProductInCookies
                             ? Math.abs(
-                                thisProductInCookies.qty - product?.countInStock
+                                thisProductInCookies.quantity -
+                                  product?.countInStock
                               )
                             : product?.countInStock,
                       }}
@@ -172,7 +173,8 @@ export default function Slug() {
                             e.target.value > max ? max : e.target.value;
                         } else if (!userInfo && thisProductInCookies) {
                           const max = Math.abs(
-                            thisProductInCookies.qty - product?.countInStock
+                            thisProductInCookies.quantity -
+                              product?.countInStock
                           );
                           e.target.value =
                             e.target.value > max ? max : e.target.value;

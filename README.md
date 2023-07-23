@@ -31,20 +31,12 @@ To launch as an independent e-commerce web application complete with these const
 
 ### 1 - Plan User Flow
 
-- Guest
-  - visit site homepage -> view products -> click on product -> add to cart (but saved into user cookies) -> click checkout -> redirected to login page
-  - if (guest == buyer), then the cart will be updated (get from cookies) ,but must immediately redirect to checkout page
-- Buyer
-  - login -> click on product -> add to cart -> view cart page -> click checkout -> confirmation page
-  - if(payment success) redirect to order details page
-- Admin
-  - login -> site knows this is admin and display homepage but with additional navlink which is admin dashboard -> click dashboard -> shows the orders,
-    manage products etc -> edit product with id 0123 to increase quantity to 100 -> save -> go to homepage -> the product is updated
+- login -> click on product -> add to cart -> view cart page -> click checkout -> confirmation page -> order details
 
 ### 2 - Plan the Pages/Components
 
 - [x] Layout component
 - [x] Homepage
 - [x] Login Page
-- [ ] Signup Page
+- [x] Signup Page
 - [ ] Cart Page
