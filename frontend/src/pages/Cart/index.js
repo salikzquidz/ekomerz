@@ -16,12 +16,14 @@ import {
   Typography,
 } from "@mui/material";
 import client from "../../utils/build-client";
+import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
   const { state, dispatch } = useContext(Store);
   const { userInfo, cart } = state;
   const [cartItem, setCartItem] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const removeItemHandler = async (id) => {
     try {
@@ -134,6 +136,14 @@ export default function Cart() {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const checkoutHandler = async () => {
+    if (userInfo?.id) {
+      navigate("/checkout");
+    } else {
+      navigate("/login");
     }
   };
 
@@ -268,7 +278,7 @@ export default function Cart() {
                 </ListItem>
                 <ListItem>
                   <Button
-                    // onClick={checkoutHandler}
+                    onClick={checkoutHandler}
                     variant="contained"
                     color="primary"
                     fullWidth
