@@ -1,18 +1,31 @@
 # Ekomerz
 
-## Goal
+An ecommerce web application where users can browse, search and purchase products that admin chose to display
 
-To launch as an independent e-commerce web application complete with these constantly-updating criterias :
+## Goals
 
-- [ ] Have authentication system
-- [ ] Have payment gateway integrated (fpx or paypal etc)
-- [ ] Deployed on the cloud
+- [x] Have authentication system
+- [x] Home Page
+- [x] Slug Page
+- [x] Guest Cart
+- [x] User Cart
+- [x] Checkout Page
+- [ ] Order Details Page
+- [ ] Admin Dashboard Page
+- [ ] Admin upload Page
+- [ ] Search bar
 
 ## Types of user
 
 - Guest
 - Buyer
-- Admin/Seller - only one
+- Admin
+
+## DB Model
+
+- Buyer
+- Products
+- Orders
 
 ## List of permissions
 
@@ -26,19 +39,3 @@ To launch as an independent e-commerce web application complete with these const
 - view orders
 - update order's status
 - delete order
-
-## Phases
-
-### 1 - Plan User Flow
-
-- login -> click on product -> add to cart -> view cart page -> click checkout -> confirmation page -> order details
-
-### 2 - Plan the Pages/Components
-
-- [x] Layout component
-- [x] Homepage
-- [x] Login Page
-- [x] Signup Page
-- [x] Cart Page
-- [ ] Checkout Page - delivery address, products ordered, payment preferences
-- [ ] Payment method component
