@@ -39,3 +39,5 @@ An ecommerce web application where users can browse, search and purchase product
 - view orders
 - update order's status
 - delete order
+
+![Ekomerz Home Page](appendix/image.png)
