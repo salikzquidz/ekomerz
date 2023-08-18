@@ -1,9 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Store } from "../../store/context";
 import {
-  Box,
   Button,
-  ButtonGroup,
   Card,
   CardActions,
   CardContent,
@@ -11,7 +9,6 @@ import {
   Chip,
   Grid,
   Link,
-  Paper,
   Stack,
   Table,
   TableBody,
@@ -20,26 +17,17 @@ import {
   TableHead,
   TableRow,
   Typography,
-  styled,
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import client from "../../utils/build-client";
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
 export default function Checkout() {
-  const [shippingAddress, setShippingAddress] = useState("");
   const [cartItem, setCartItem] = useState([]);
   const [subTotal, setSubTotal] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("FPX");
   const [total, setTotal] = useState(null);
   const { state, dispatch } = useContext(Store);
+  const navigate = useNavigate();
   const { userInfo } = state;
 
   console.log(paymentMethod);
@@ -47,11 +35,28 @@ export default function Checkout() {
   const TAX = 0.006;
 
   const handlePaymentMethodChange = (e) => {
-    console.log("change payment method");
-    console.log(e.target.innerText);
-    console.log(paymentMethod);
     setPaymentMethod(e.target.innerText);
-    // setPaymentMethod("target.innerText");
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      let response = await client.post("/order", {
+        products: cartItem,
+        subTotal,
+        tax: TAX,
+        total,
+        status: "Pending",
+      });
+      if (response.status === 201) {
+        // remove item from user cart context
+        dispatch({
+          type: "CLEAR_CART",
+        });
+        navigate("/order");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // to retrieve item details
@@ -63,7 +68,6 @@ export default function Checkout() {
 
     try {
       const userInfo = await client.get("/currentuser");
-
       if (userInfo?.data?.id) {
         cartToDisplay = userInfo.data.cart;
       } else {
@@ -107,15 +111,10 @@ export default function Checkout() {
     populateCart();
   }, []);
 
-  // useEffect(() => {
-  //   // get user info for delivery - address
-  //   // populate product details
-  // }, []);
-
   return (
     <>
       <div>
-        <h1>Checkout</h1>
+        <h1>Checkout </h1>
       </div>
       <Grid container spacing={2}>
         <Grid item xs={12}>
@@ -162,6 +161,7 @@ export default function Checkout() {
                         <TableCell>
                           <img
                             src={`http://localhost:3300/${x.image}`}
+                            alt="product"
                             width={50}
                             height={50}
                           />
@@ -226,6 +226,7 @@ export default function Checkout() {
               <Button
                 variant="contained"
                 sx={{ marginLeft: "auto", marginRight: "1rem" }}
+                onClick={handlePlaceOrder}
               >
                 Place Order
               </Button>

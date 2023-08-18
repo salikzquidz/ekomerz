@@ -19,11 +19,14 @@ const examineTheCartCookies = () => {
   }
 };
 
+// const examineOrderCookies = () => {};
+
 const initialState = {
   darkMode: Cookies.get("darkMode") === "ON" ? true : false,
   currentUser: Cookies.get("currentUser"),
   userInfo: null,
   cart: examineTheCartCookies(), // for guest cart
+  // order: examineOrderCookies(),
 };
 
 function reducer(state, action) {
@@ -36,6 +39,14 @@ function reducer(state, action) {
       return { ...state, userInfo: action.payload };
     case "REMOVE_USER_INFO":
       return { ...state, userInfo: null };
+    case "CLEAR_CART":
+      return {
+        ...state,
+        userInfo: {
+          ...state.userInfo,
+          cart: [],
+        },
+      };
     case "UPDATE_CART":
       let itemFoundd = state.userInfo.cart.find(
         (x) => x.productId === action.payload.id
@@ -50,7 +61,7 @@ function reducer(state, action) {
           Number(itemFoundd.quantity) + Number(action.payload.quantity);
 
         if (
-          Number(itemFoundd.quantity) + Number(action.payload.quantity) ==
+          Number(itemFoundd.quantity) + Number(action.payload.quantity) ===
           0
         ) {
           return {
@@ -91,7 +102,7 @@ function reducer(state, action) {
           return { ...x };
         });
 
-        if (itemFound.quantity + action.payload.quantity == 0) {
+        if (itemFound.quantity + action.payload.quantity === 0) {
           Cookies.set(
             "cart",
             JSON.stringify(

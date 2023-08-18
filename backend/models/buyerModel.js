@@ -33,12 +33,6 @@ buyerSchema.pre("updateOne", async function (next) {
     if (specificProductInsideCart?.products[0]?.quantity + quantityInput < 0) {
       throw "Not valid input, the item in the cart is not that much";
     }
-    // if (
-    //   specificProductInsideCart?.products[0]?.quantity + quantityInput ===
-    //   0
-    // ) {
-    //   console.log("should delete this cart");
-    // }
   }
   next();
 });

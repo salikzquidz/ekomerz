@@ -6,6 +6,7 @@ const cartRoutes = require("../routes/cartRoutes");
 const authRoutes = require("../routes/authRoutes");
 const checkoutRoutes = require("../routes/checkoutRoutes");
 const currentUserRoute = require("../routes/currentUserRoute");
+const orderRoute = require("../routes/orderRoutes");
 const currentUser = require("../middlewares/currentUser");
 require("dotenv").config();
 
@@ -36,6 +37,7 @@ module.exports = function (app) {
     cartRoutes,
     authRoutes,
     checkoutRoutes,
+    orderRoute,
     currentUserRoute
   );
   app.use("/images/product/", express.static("images/product")); // localhost:3300/images/product/....png
